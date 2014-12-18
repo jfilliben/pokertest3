@@ -13,6 +13,7 @@
 		AEDC9D281A41BDB900A129A2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AEDC9D271A41BDB900A129A2 /* Images.xcassets */; };
 		AEDC9D2B1A41BDB900A129A2 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = AEDC9D291A41BDB900A129A2 /* LaunchScreen.xib */; };
 		AEDC9D371A41BDB900A129A2 /* pokertest3Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEDC9D361A41BDB900A129A2 /* pokertest3Tests.swift */; };
+		AEDC9DC21A420DA700A129A2 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEDC9DC01A420DA700A129A2 /* Structures.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		AEDC9D301A41BDB900A129A2 /* pokertest3Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = pokertest3Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEDC9D351A41BDB900A129A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AEDC9D361A41BDB900A129A2 /* pokertest3Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pokertest3Tests.swift; sourceTree = "<group>"; };
+		AEDC9DC01A420DA700A129A2 /* Structures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 				AEDC9D241A41BDB900A129A2 /* Main.storyboard */,
 				AEDC9D271A41BDB900A129A2 /* Images.xcassets */,
 				AEDC9D291A41BDB900A129A2 /* LaunchScreen.xib */,
+				AEDC9DC01A420DA700A129A2 /* Structures.swift */,
 				AEDC9D1E1A41BDB900A129A2 /* Supporting Files */,
 			);
 			path = pokertest3;
@@ -213,6 +216,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AEDC9D231A41BDB900A129A2 /* ViewController.swift in Sources */,
+				AEDC9DC21A420DA700A129A2 /* Structures.swift in Sources */,
 				AEDC9D211A41BDB900A129A2 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -407,6 +411,7 @@
 				AEDC9D3C1A41BDB900A129A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AEDC9D3D1A41BDB900A129A2 /* Build configuration list for PBXNativeTarget "pokertest3Tests" */ = {
 			isa = XCConfigurationList;
@@ -415,6 +420,7 @@
 				AEDC9D3F1A41BDB900A129A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
