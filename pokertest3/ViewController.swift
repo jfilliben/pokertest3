@@ -78,8 +78,11 @@ class ViewController: UIViewController {
     @IBOutlet weak var gameLogoView: UIImageView!
     @IBOutlet weak var startGameButtonView: UIButton!
     
+    @IBOutlet weak var tableLogTextView: UITextView!
+    
     var game = GameState()
-    var maxBuyIn = 100
+    var maxBuyIn = 200
+    let debugShowCards = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -132,9 +135,13 @@ class ViewController: UIViewController {
         player4StackView.text = "$\(game.returnPlayerStack(4))"
         player5StackView.text = "$\(game.returnPlayerStack(5))"
 
-
-// fake "Start Game button Pressed"
-
+        tableLogTextView.editable = false
+        tableLogTextView.scrollEnabled = false
+        tableLogTextView.text = game.returnTableLog()
+        tableLogTextView.scrollRangeToVisible(NSRange(location: countElements(tableLogTextView.text!), length: 0))
+        tableLogTextView.scrollEnabled = true
+        
+        // fake "Start Game button Pressed"
         gameLogoView.hidden = true
         startGameButtonView.hidden = true
         dealButtonView.hidden = false
@@ -146,37 +153,58 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    @IBAction func startGameButtonPressed(sender: AnyObject) {
-        gameLogoView.hidden = true
-        startGameButtonView.hidden = true
-        dealButtonView.hidden = false
-        game.startGame()
-    }
-    
-    @IBAction func dealButtonPress(sender: AnyObject) {
-        dealButtonView.hidden = true
-        game.buttonPressed(ButtonPressed.Deal)
-
-        userCard1View.image = UIImage(named: game.returnCard(0, cardNum: 0))
-        userCard2View.image = UIImage(named: game.returnCard(0, cardNum: 1))
-        player1Card1View.image = UIImage(named: game.returnCard(1, cardNum: 0))
-        player1Card2View.image = UIImage(named: game.returnCard(1, cardNum: 1))
-        player2Card1View.image = UIImage(named: game.returnCard(2, cardNum: 0))
-        player2Card2View.image = UIImage(named: game.returnCard(2, cardNum: 1))
-        player3Card1View.image = UIImage(named: game.returnCard(3, cardNum: 0))
-        player3Card2View.image = UIImage(named: game.returnCard(3, cardNum: 1))
-        player4Card1View.image = UIImage(named: game.returnCard(4, cardNum: 0))
-        player4Card2View.image = UIImage(named: game.returnCard(4, cardNum: 1))
-        player5Card1View.image = UIImage(named: game.returnCard(5, cardNum: 0))
-        player5Card2View.image = UIImage(named: game.returnCard(5, cardNum: 1))
+    func updateGameView() {
+        
+        if debugShowCards {
+            player1Card1View.image = UIImage(named: game.returnPlayerCard(1, cardNum: 0))
+            player1Card2View.image = UIImage(named: game.returnPlayerCard(1, cardNum: 1))
+            player2Card1View.image = UIImage(named: game.returnPlayerCard(2, cardNum: 0))
+            player2Card2View.image = UIImage(named: game.returnPlayerCard(2, cardNum: 1))
+            player3Card1View.image = UIImage(named: game.returnPlayerCard(3, cardNum: 0))
+            player3Card2View.image = UIImage(named: game.returnPlayerCard(3, cardNum: 1))
+            player4Card1View.image = UIImage(named: game.returnPlayerCard(4, cardNum: 0))
+            player4Card2View.image = UIImage(named: game.returnPlayerCard(4, cardNum: 1))
+            player5Card1View.image = UIImage(named: game.returnPlayerCard(5, cardNum: 0))
+            player5Card2View.image = UIImage(named: game.returnPlayerCard(5, cardNum: 1))
+        } else {
+            player1Card1View.image = UIImage(named: "back")
+            player1Card2View.image = UIImage(named: "back")
+            player2Card1View.image = UIImage(named: "back")
+            player2Card2View.image = UIImage(named: "back")
+            player3Card1View.image = UIImage(named: "back")
+            player3Card2View.image = UIImage(named: "back")
+            player4Card1View.image = UIImage(named: "back")
+            player4Card2View.image = UIImage(named: "back")
+            player5Card1View.image = UIImage(named: "back")
+            player5Card2View.image = UIImage(named: "back")
+        }
+        
+        switch game.returnHandRound() {
+        case .Preflop: break
+        case .Flop:
+            boardCard1View.image = UIImage(named: game.returnBoardCard(1))
+            boardCard1View.hidden = false
+            boardCard2View.image = UIImage(named: game.returnBoardCard(2))
+            boardCard2View.hidden = false
+            boardCard3View.image = UIImage(named: game.returnBoardCard(3))
+            boardCard3View.hidden = false
+        case .Turn:
+            boardCard4View.image = UIImage(named: game.returnBoardCard(4))
+            boardCard4View.hidden = false
+        case .River:
+            boardCard5View.image = UIImage(named: game.returnBoardCard(5))
+            boardCard5View.hidden = false
+        }
+        userCard1View.image = UIImage(named: game.returnPlayerCard(0, cardNum: 0))
+        userCard2View.image = UIImage(named: game.returnPlayerCard(0, cardNum: 1))
+        userCard1View.hidden = false
+        userCard2View.hidden = false
+        potView.hidden = false
         player1CardView.hidden = !game.returnPlayerInHand(1)
         player2CardView.hidden = !game.returnPlayerInHand(2)
         player3CardView.hidden = !game.returnPlayerInHand(3)
         player4CardView.hidden = !game.returnPlayerInHand(4)
         player5CardView.hidden = !game.returnPlayerInHand(5)
-        userCard1View.hidden = false
-        userCard2View.hidden = false
-        potView.hidden = false
         userStackView.text = "$\(game.returnPlayerStack(0))"
         player1StackView.text = "$\(game.returnPlayerStack(1))"
         player2StackView.text = "$\(game.returnPlayerStack(2))"
@@ -190,6 +218,107 @@ class ViewController: UIViewController {
         player4BetAmountView.text = "$\(game.returnPlayerBetAmount(4))"
         player5BetAmountView.text = "$\(game.returnPlayerBetAmount(5))"
         potView.text = "$\(game.returnPotSize())"
+
+        tableLogTextView.scrollEnabled = false
+        tableLogTextView.text = game.returnTableLog()
+        tableLogTextView.scrollRangeToVisible(NSRange(location: countElements(tableLogTextView.text!), length: 0))
+        tableLogTextView.scrollEnabled = true
+        
+        // check status of game to determine buttons to display
+        
+        betButtonView.hidden = false
+        checkButtonView.hidden = false
+        raiseButtonView.hidden = false
+        foldButtonView.hidden = false
+
     }
+    
+    @IBAction func startGameButtonPressed(sender: AnyObject) {
+        gameLogoView.hidden = true
+        startGameButtonView.hidden = true
+        dealButtonView.hidden = false
+        game.startGame()
+    }
+    
+    @IBAction func dealButtonPress(sender: AnyObject) {
+        dealButtonView.hidden = true
+        game.buttonPressed(ButtonPressed.Deal)
+
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+//            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
+    @IBAction func betButtonPress(sender: AnyObject) {
+        
+        game.buttonPressed(ButtonPressed.Bet(10.00))
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+            //            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
+    
+    @IBAction func checkButtonPress(sender: AnyObject) {
+        
+        game.buttonPressed(ButtonPressed.Check)
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+            //            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
+    @IBAction func raiseButtonPress(sender: AnyObject) {
+        
+        game.buttonPressed(ButtonPressed.Raise(15.00))
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+            //            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
+    @IBAction func foldButtonPress(sender: AnyObject) {
+        
+        game.buttonPressed(ButtonPressed.Fold)
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+            //            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
+    @IBAction func callButtonPress(sender: AnyObject) {
+        
+        game.buttonPressed(ButtonPressed.Call)
+        self.updateGameView()
+        
+        var userTurn = false
+        while !userTurn {
+            //            sleep(2)
+            userTurn = game.continueGame()
+            self.updateGameView()
+        }
+    }
+    
 }
 

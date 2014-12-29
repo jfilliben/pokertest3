@@ -325,7 +325,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Pcf-JO-UTr" userLabel="gameLogView">
                                 <rect key="frame" x="16" y="384" width="212" height="216"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hand Log" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Bw-aT-Tit">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Table Log" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Bw-aT-Tit">
                                         <rect key="frame" x="0.0" y="0.0" width="212" height="21"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="ni0-v8-O3S"/>
@@ -334,11 +334,22 @@
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g2a-rL-RqT" userLabel="tableLogTextView">
+                                        <rect key="frame" x="0.0" y="21" width="212" height="195"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="4Bw-aT-Tit" secondAttribute="trailing" id="16C-YQ-7NY"/>
+                                    <constraint firstAttribute="trailing" secondItem="g2a-rL-RqT" secondAttribute="trailing" id="5Hg-vh-yDI"/>
                                     <constraint firstItem="4Bw-aT-Tit" firstAttribute="leading" secondItem="Pcf-JO-UTr" secondAttribute="leading" id="EKX-Yq-k34"/>
+                                    <constraint firstAttribute="bottom" secondItem="g2a-rL-RqT" secondAttribute="bottom" id="Ga0-oX-g0J"/>
+                                    <constraint firstItem="g2a-rL-RqT" firstAttribute="top" secondItem="4Bw-aT-Tit" secondAttribute="bottom" id="dL3-Sk-XVJ"/>
+                                    <constraint firstItem="g2a-rL-RqT" firstAttribute="leading" secondItem="Pcf-JO-UTr" secondAttribute="leading" id="kwR-1T-dZF"/>
                                     <constraint firstItem="4Bw-aT-Tit" firstAttribute="top" secondItem="Pcf-JO-UTr" secondAttribute="top" id="pOh-uq-gwG"/>
                                 </constraints>
                             </view>
@@ -367,6 +378,9 @@
                                         <state key="normal" title="Bet">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="betButtonPress:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Hth-6y-zhI"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SVE-Qw-ICG" userLabel="checkButton">
                                         <rect key="frame" x="5" y="78" width="80" height="21"/>
@@ -381,6 +395,9 @@
                                         <state key="normal" title="Check">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="checkButtonPress:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4Bd-a7-Nr2"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pJu-gC-hCa" userLabel="raiseButton">
                                         <rect key="frame" x="5" y="104" width="80" height="21"/>
@@ -395,6 +412,9 @@
                                         <state key="normal" title="Raise">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="raiseButtonPress:" destination="BYZ-38-t0r" eventType="touchUpInside" id="LH3-RZ-XZW"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mwK-LU-WDk" userLabel="dealButton">
                                         <rect key="frame" x="5" y="26" width="80" height="21"/>
@@ -425,9 +445,12 @@
                                         <state key="normal" title="Fold">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="foldButtonPress:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9Kr-Oh-Lj1"/>
+                                        </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LMI-Hz-iZ2" userLabel="callButton">
-                                        <rect key="frame" x="5" y="156" width="80" height="27"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LMI-Hz-iZ2" userLabel="callButton">
+                                        <rect key="frame" x="5" y="156" width="80" height="21"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="G0y-6j-zda"/>
                                             <constraint firstAttribute="width" constant="80" id="mRs-3j-zvR"/>
@@ -436,6 +459,9 @@
                                         <state key="normal" title="Call">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
+                                        <connections>
+                                            <action selector="callButtonPress:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3XF-Ad-FxU"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -520,24 +546,27 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AmB-b7-VDL" userLabel="player1CardView">
-                                <rect key="frame" x="85" y="312" width="43" height="52"/>
+                                <rect key="frame" x="85" y="292" width="64" height="72"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="back" translatesAutoresizingMaskIntoConstraints="NO" id="FHc-M0-59C" userLabel="playerCard1View">
-                                        <rect key="frame" x="0.0" y="23" width="20" height="29"/>
+                                        <rect key="frame" x="0.0" y="28" width="30" height="44"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="29" id="51J-gb-Wx0"/>
-                                            <constraint firstAttribute="width" constant="20" id="adf-Rl-OOH"/>
+                                            <constraint firstAttribute="width" constant="30" id="2hY-76-6Bb"/>
+                                            <constraint firstAttribute="height" constant="44" id="Vfn-UD-RUc"/>
                                         </constraints>
                                     </imageView>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="back" translatesAutoresizingMaskIntoConstraints="NO" id="O38-hr-NY5" userLabel="playerCard2View">
-                                        <rect key="frame" x="23" y="23" width="20" height="29"/>
+                                        <rect key="frame" x="34" y="28" width="30" height="44"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="29" id="bZe-rB-N59"/>
-                                            <constraint firstAttribute="width" constant="20" id="cUP-xK-id3"/>
+                                            <constraint firstAttribute="width" constant="30" id="Ugj-ne-hg5"/>
+                                            <constraint firstAttribute="height" constant="44" id="m8S-sL-dub"/>
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="$0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hT5-Dn-PFK" userLabel="betAmount">
-                                        <rect key="frame" x="0.0" y="0.0" width="43" height="15"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="64" height="21"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="21" id="h94-RM-XQe"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -545,15 +574,15 @@
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="52" id="4Sv-z2-wBV"/>
-                                    <constraint firstItem="FHc-M0-59C" firstAttribute="leading" secondItem="AmB-b7-VDL" secondAttribute="leading" id="M0L-4w-FGh"/>
-                                    <constraint firstItem="hT5-Dn-PFK" firstAttribute="leading" secondItem="AmB-b7-VDL" secondAttribute="leading" id="WsW-qF-D4g"/>
-                                    <constraint firstAttribute="bottom" secondItem="O38-hr-NY5" secondAttribute="bottom" id="YQB-np-SfQ"/>
-                                    <constraint firstAttribute="trailing" secondItem="O38-hr-NY5" secondAttribute="trailing" id="cC6-ID-qMd"/>
-                                    <constraint firstAttribute="trailing" secondItem="hT5-Dn-PFK" secondAttribute="trailing" id="lJT-ZJ-N6x"/>
-                                    <constraint firstAttribute="width" constant="43" id="s5v-iq-QVI"/>
-                                    <constraint firstItem="FHc-M0-59C" firstAttribute="bottom" secondItem="AmB-b7-VDL" secondAttribute="bottom" id="s6e-x8-rPM"/>
-                                    <constraint firstItem="hT5-Dn-PFK" firstAttribute="top" secondItem="AmB-b7-VDL" secondAttribute="top" id="uaC-PG-6u6"/>
+                                    <constraint firstAttribute="height" constant="72" id="4Sv-z2-wBV"/>
+                                    <constraint firstItem="hT5-Dn-PFK" firstAttribute="top" secondItem="AmB-b7-VDL" secondAttribute="top" id="BHL-Ie-G1u"/>
+                                    <constraint firstItem="FHc-M0-59C" firstAttribute="leading" secondItem="AmB-b7-VDL" secondAttribute="leading" id="QKE-ds-6px"/>
+                                    <constraint firstAttribute="bottom" secondItem="O38-hr-NY5" secondAttribute="bottom" id="adR-WY-LRv"/>
+                                    <constraint firstAttribute="trailing" secondItem="O38-hr-NY5" secondAttribute="trailing" id="dlM-9L-fpX"/>
+                                    <constraint firstItem="hT5-Dn-PFK" firstAttribute="leading" secondItem="AmB-b7-VDL" secondAttribute="leading" id="m7H-s8-HZV"/>
+                                    <constraint firstAttribute="bottom" secondItem="FHc-M0-59C" secondAttribute="bottom" id="r88-Ny-y4H"/>
+                                    <constraint firstAttribute="width" constant="64" id="s5v-iq-QVI"/>
+                                    <constraint firstAttribute="trailing" secondItem="hT5-Dn-PFK" secondAttribute="trailing" id="uy8-9V-e63"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="20h-Pu-aFR" userLabel="player3CardView">
@@ -847,6 +876,7 @@
                         <outlet property="potView" destination="3Js-Gf-EUS" id="Ka1-ck-fdZ"/>
                         <outlet property="raiseButtonView" destination="pJu-gC-hCa" id="H9O-Cs-Fkg"/>
                         <outlet property="startGameButtonView" destination="Ijt-2E-xTJ" id="Wdy-Bv-t5o"/>
+                        <outlet property="tableLogTextView" destination="g2a-rL-RqT" id="6pb-LG-qGN"/>
                         <outlet property="userBetAmountView" destination="eis-yN-BwT" id="yzO-Di-rFG"/>
                         <outlet property="userCard1View" destination="2Q5-4f-Zik" id="e1b-yi-b9Q"/>
                         <outlet property="userCard2View" destination="ATE-JF-j7W" id="IxD-pp-exm"/>
