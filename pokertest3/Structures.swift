@@ -12,6 +12,10 @@ enum HandRound : Int {
     case Preflop = 0, Flop, Turn, River
 }
 
+enum HandStatus {
+    case NoBet, BetPlaced, BetMoreThanStack, PlayerFolded, HandComplete
+}
+
 enum ButtonPressed {
     case Deal, Bet(NSDecimalNumber), Raise(NSDecimalNumber), Call, Fold, Check
 }
@@ -71,6 +75,19 @@ class Deck {
         }
     }
     
+    func reset() {
+        deck.removeAll()
+        var n = 2
+        while let rank = Rank(rawValue: n) {
+            var m = 0
+            while let suit = Suit(rawValue: m) {
+                deck.append(Card(rank: rank, suit: suit))
+                m++
+            }
+            n++
+        }
+    }
+
     func shuffle() {
         var tempDeck = deck
         for i in reverse(1 ... (deck.count - 1)) {
@@ -108,31 +125,40 @@ class GameState {
         // empty for now
     }
     
-    func continueGame() -> Bool {
-        return table.continueHand()
+    func continueGame() {
+        table.continueHand()
+        if self.returnHandStatus() == .HandComplete {
+            table.endHand()
+        }
     }
     
-    func returnPlayerCard (playerNum: Int, cardNum: Int) -> String {
-        return table.returnPlayerCard(playerNum, cardNum: cardNum)
+    func returnHandStatus() -> HandStatus {
+        return table.returnHandStatus()
     }
     
-    func returnPlayerStack (playerNum: Int) -> NSDecimalNumber { return table.returnPlayerStack(playerNum) }
+    func returnPlayerCardImage(playerNum: Int, cardNum: Int) -> String {
+        return table.returnPlayerCardImage(playerNum, cardNum: cardNum)
+    }
     
-    func returnPlayerName (playerNum: Int) -> String { return table.returnPlayerName(playerNum) }
+    func isUserTurn() -> Bool { return table.isUserTurn() }
     
-    func returnPlayerImage (playerNum: Int) -> String { return table.returnPlayerImage(playerNum) }
+    func returnPlayerStack(playerNum: Int) -> NSDecimalNumber { return table.returnPlayerStack(playerNum) }
     
-    func returnPlayerBetAmount (playerNum: Int) -> NSDecimalNumber { return table.returnPlayerBetAmount(playerNum) }
+    func returnPlayerName(playerNum: Int) -> String { return table.returnPlayerName(playerNum) }
     
-    func returnPlayerInHand (playerNum: Int) -> Bool { return table.playerInHand(playerNum) }
+    func returnPlayerImage(playerNum: Int) -> String { return table.returnPlayerImage(playerNum) }
     
-    func returnTableLog () -> String { return table.tableLog }
+    func returnPlayerBetAmount(playerNum: Int) -> NSDecimalNumber { return table.returnPlayerBetAmount(playerNum) }
     
-    func returnPotSize () -> NSDecimalNumber { return table.returnPotSize() }
+    func returnPlayerInHand(playerNum: Int) -> Bool { return table.playerInHand(playerNum) }
     
-    func returnHandRound () -> HandRound { return table.returnHandRound() }
+    func returnTableLog() -> String { return table.tableLog }
     
-    func returnBoardCard (cardNum: Int) -> String { return table.returnBoardCard(cardNum) }
+    func returnPotSize() -> NSDecimalNumber { return table.returnPotSize() }
+    
+    func returnHandRound() -> HandRound { return table.returnHandRound() }
+    
+    func returnBoardCardImage(cardNum: Int) -> String { return table.returnBoardCardImage(cardNum) }
     
     func buttonPressed(button: ButtonPressed) {
         switch button {
@@ -149,140 +175,8 @@ class GameState {
         case .Fold:
             table.userFold()
         }
-    }
-}
-
-// Player Class //
-
-class Player {
-    var name: String
-    var image = "player1"
-    var stackSize: NSDecimalNumber
-    var betAmountRound: NSDecimalNumber = 0.00
-    var dealtCards: [Card] = [Card(rank: Rank.Ace, suit: Suit.Spades), Card(rank: Rank.Ace, suit: Suit.Spades)]
-    
-    init(name: String, stackSize: NSDecimalNumber) {
-        self.name = name
-        self.stackSize = stackSize
-    }
-    
-    func handReset() {
-//empty for now
-    }
-    
-}
-
-class ComputerPlayer: Player {
-    //    var logicAlgorithm : () -> PlayerAction()
-    var tiltFactor = 0
-    var attemptCheckRaise = false
-    let takeAction: (Int, RoundState) -> PlayerAction
-
-    override func handReset() {
-        super.handReset()
-        attemptCheckRaise = false
-    }
-    
-    init(name: String, stackSize: NSDecimalNumber, takeAction: (Int, RoundState) -> PlayerAction) {
-        self.takeAction = takeAction
-        super.init(name: name, stackSize: stackSize)
-    }
-}
-
-class HumanPlayer: Player {
-    //    var x = true
-}
-
-class PlayerClass {
-    var user = HumanPlayer(       name: "Jeremy",  stackSize: 200.00)
-    var players = [ComputerPlayer]()
-
-    init() {
-        players.append(ComputerPlayer(name: "Alice", stackSize: 100.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Bob",   stackSize: 90.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Carl",  stackSize: 80.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Dawn",  stackSize: 70.00, alwaysCall))
-        players.append(ComputerPlayer(name: "Edwin", stackSize: 60.00, alwaysCall))
-        user.image = "player2"
-    }
-
-    func returnPlayerName(playerNum: Int) -> String {
-        switch playerNum {
-        case 0: return user.name
-        default: return players[playerNum-1].name
-        }
-    }
-    
-    func returnPlayerImage(playerNum: Int) -> String {
-        switch playerNum {
-        case 0: return user.image
-        default: return players[playerNum-1].image
-        }
-    }
-    
-    func returnPlayerCard(playerNum: Int, cardNum: Int) -> String {
-        switch playerNum {
-        case 0: return (user.dealtCards[cardNum].cardImage)
-        default: return (players[playerNum-1].dealtCards[cardNum].cardImage)
-        }
-    }
-
-    func returnPlayerStack(playerNum: Int) -> NSDecimalNumber {
-        switch playerNum {
-        case 0: return user.stackSize
-        default: return players[playerNum-1].stackSize
-        }
-    }
-    
-    func returnPlayerBetAmount(playerNum: Int) -> NSDecimalNumber {
-        switch playerNum {
-        case 0: return user.betAmountRound
-        default: return players[playerNum-1].betAmountRound
-        }
-    }
-    
-    func handReset(numPlayers: Int) {
-        user.handReset()
-        for compPlayerNum in 0..<(numPlayers - 1) {
-            players[compPlayerNum].handReset()
-        }
-    }
-    
-    func dealtCard(playerNum: Int, cardNum: Int, card: Card) {
-        switch playerNum {
-        case 0: user.dealtCards[cardNum] = card
-        default: players[playerNum-1].dealtCards[cardNum] = card
-        }
-    }
-    
-    func takeAction(playerNum: Int, roundState: RoundState) -> PlayerAction {
-        return players[playerNum-1].takeAction(playerNum, roundState)
-    }
-
-    func moneyInPot (playerNum: Int, amount: NSDecimalNumber) -> NSDecimalNumber {
-        switch playerNum {
-        case 0:
-            if user.stackSize >= amount {
-                user.stackSize -= amount
-                user.betAmountRound += amount
-                return amount
-            } else {
-                let tempBet = user.stackSize
-                user.betAmountRound += tempBet
-                user.stackSize = 0
-                return tempBet
-            }
-        default:
-            if players[playerNum-1].stackSize >= amount {
-                players[playerNum-1].stackSize -= amount
-                players[playerNum-1].betAmountRound += amount
-                return amount
-            } else {
-                let tempBet = players[playerNum-1].stackSize
-                players[playerNum-1].betAmountRound += tempBet
-                players[playerNum-1].stackSize = 0
-                return tempBet
-            }
+        if self.returnHandStatus() == .HandComplete {
+            table.endHand()
         }
     }
 }
@@ -302,7 +196,7 @@ class TableState {
     var smallBlindPlayer: Int { get { return (buttonPlayer + 1) % numPlayers } }
     var bigBlindPlayer: Int { get { return (buttonPlayer + 2) % numPlayers } }
     var UTGPlayer: Int { get { return (buttonPlayer + 3) % numPlayers } }
-    var cutoffPlayer: Int { get { return (buttonPlayer - 1) % numPlayers } }
+    var cutoffPlayer: Int { get { return (buttonPlayer + numPlayers - 1) % numPlayers } }
 
     init(numPlayers: Int, numCardsPerPlayer: Int, smallBlindSize: NSDecimalNumber, bigBlindSize: NSDecimalNumber, maxBuyIn: NSDecimalNumber) {
         self.numPlayers = numPlayers
@@ -316,23 +210,27 @@ class TableState {
         tableLog += "Blinds $\(smallBlindSize)/$\(bigBlindSize)\n"
     }
     
-    func returnPlayerCard (playerNum: Int, cardNum: Int) -> String { return players.returnPlayerCard(playerNum, cardNum: cardNum) }
+    func returnHandStatus() -> HandStatus { return hand.returnHandStatus(players) }
+    
+    func isUserTurn() -> Bool { return hand.isUserTurn() }
+    
+    func returnPlayerImage(playerNum: Int) -> String { return players.returnPlayerImage(playerNum) }
+    
+    func returnPlayerBetAmount(playerNum: Int) -> NSDecimalNumber { return players.returnPlayerBetAmount(playerNum) }
+    
+    func returnPlayerName(playerNum: Int) -> String { return players.returnPlayerName(playerNum) }
+    
+    func returnPlayerStack(playerNum: Int) -> NSDecimalNumber { return players.returnPlayerStack(playerNum) }
+    
+    func returnPlayerCardImage(playerNum: Int, cardNum: Int) -> String { return players.returnPlayerCardImage(playerNum, cardNum: cardNum) }
 
-    func returnBoardCard (cardNum: Int) -> String { return hand.returnBoardCard(cardNum) }
+    func returnBoardCardImage(cardNum: Int) -> String { return hand.returnBoardCardImage(cardNum) }
     
-    func returnPlayerImage (playerNum: Int) -> String { return players.returnPlayerImage(playerNum) }
+    func playerInHand(playerNum: Int) -> Bool { return hand.inHand(playerNum) }
     
-    func returnPlayerBetAmount (playerNum: Int) -> NSDecimalNumber { return players.returnPlayerBetAmount(playerNum) }
+    func returnPotSize() -> NSDecimalNumber { return hand.roundState.potSize }
     
-    func returnPlayerName (playerNum: Int) -> String { return players.returnPlayerName(playerNum) }
-
-    func playerInHand (playerNum: Int) -> Bool { return hand.inHand(playerNum) }
-    
-    func returnPlayerStack (playerNum: Int) -> NSDecimalNumber { return players.returnPlayerStack(playerNum) }
-    
-    func returnPotSize () -> NSDecimalNumber { return hand.roundState.potSize }
-    
-    func returnHandRound () -> HandRound { return hand.returnHandRound() }
+    func returnHandRound() -> HandRound { return hand.returnHandRound() }
     
     func startHand() {
         hand.handReset(players, buttonPlayer: buttonPlayer)
@@ -342,9 +240,8 @@ class TableState {
         tableLog += "\(numPlayers) players in hand\n"
     }
     
-    func continueHand() -> Bool {
+    func continueHand() {
         tableLog += hand.continueHand(players)
-        return hand.actionPlayer == 0
     }
     
     func endHand() {
@@ -378,54 +275,139 @@ class TableState {
 
 class HandState {
     var deck = Deck()
+    var board: [Card] = []
     var actionPlayer = 0
     var potSize: NSDecimalNumber = 0.00
     let numPlayers: Int
     let numCardsPerPlayer: Int
     let roundState: RoundState
     let buttonPlayer: Int
+    var numPlayersInHand: Int
+    var handComplete = false
    
     init(numPlayers: Int, numCardsPerPlayer: Int, buttonPlayer: Int) {
         self.numPlayers = numPlayers
+        self.numPlayersInHand = numPlayers
         self.numCardsPerPlayer = numCardsPerPlayer
         self.buttonPlayer = buttonPlayer
         roundState = RoundState(numPlayers: numPlayers, buttonPlayer: buttonPlayer)
     }
 
+    func handReset(players: PlayerClass, buttonPlayer: Int) {
+        handComplete = false
+        deck.reset()
+        board.removeAll()
+        potSize = 0.00
+        players.handReset(numPlayers)
+        roundState.reset(players, buttonPlayer: buttonPlayer)
+        actionPlayer = (buttonPlayer + 3) % numPlayers
+    }
+    
+    func isUserTurn() -> Bool { return actionPlayer == 0 }
+    
     func inHand(playerNum: Int) -> Bool { return roundState.playerInHand[playerNum] }
     
-    func returnHandRound() -> HandRound { return roundState.round }
-    
-    func returnBoardCard(cardNum: Int) -> String { return roundState.board[cardNum-1].cardImage }
-    
-    func handReset(players: PlayerClass, buttonPlayer: Int) {
-        potSize = 0.00
-        actionPlayer = (buttonPlayer + 3) % numPlayers
-        players.handReset(numPlayers)
-        roundState.reset(players)
+    func returnHandStatus(players: PlayerClass) -> HandStatus {
+        if handComplete { return .HandComplete }
+        if !roundState.playerInHand[0] { return .PlayerFolded }
+        if roundState.betToCall > players.returnPlayerStack(0) {
+            return .BetMoreThanStack
+        }
+        if roundState.betToCall == 0 {
+            return .NoBet
+        } else {
+            return .BetPlaced
+        }
     }
 
-    func advanceRound() {
-        roundState.advanceRound(deck)
+    func returnHandRound() -> HandRound { return roundState.round }
+    
+    func returnBoardCardImage(cardNum: Int) -> String { return board[cardNum-1].cardImage }
+    
+    func advanceRound(players: PlayerClass) -> String {
+        var tableLog = ""
+        if roundState.round == .River {
+            tableLog += self.completeHand(players)
+            handComplete = true
+            return tableLog
+        }
+        roundState.advanceRound(deck, buttonPlayer: buttonPlayer)
         actionPlayer = (buttonPlayer + 1) % numPlayers
+        switch roundState.round {
+        case .Flop:
+            tableLog += "Flop is "
+            board.append(deck.dealCard())
+            tableLog += "\(board[0].cardImage) "
+            board.append(deck.dealCard())
+            tableLog += "\(board[1].cardImage) "
+            board.append(deck.dealCard())
+            tableLog += "\(board[2].cardImage)\n"
+        case .Turn:
+            tableLog += "Turn card is "
+            board.append(deck.dealCard())
+            tableLog += "\(board[3].cardImage)\n"
+        case .River:
+            tableLog += "River card is "
+            board.append(deck.dealCard())
+            tableLog += "\(board[4].cardImage)\n"
+        default: break
+        }
+        return tableLog
     }
 
     func continueHand(players: PlayerClass) -> String {
         var tableLog: String = ""
-        if (roundState.playerStacks[actionPlayer] > 0) && roundState.playerInHand[actionPlayer] {
+        if (roundState.playerStacks[actionPlayer] != 0) && roundState.playerInHand[actionPlayer] {
             let playerAction = players.takeAction(actionPlayer, roundState: roundState)
             tableLog += roundState.updateRound(actionPlayer, playerAction: playerAction, players: players)
         }
         potSize = roundState.potSize
         if actionPlayer == roundState.lastToAct
         {
-            self.advanceRound()
+            tableLog += self.advanceRound(players)
         } else {
             actionPlayer = (actionPlayer + 1) % numPlayers
         }
         return tableLog
     }
+    
+    func completeHand(players: PlayerClass) -> String {
+        var winningPlayer = 0
+        var tableLog = ""
+        if numPlayersInHand == 1 {
+            while !roundState.playerInHand[winningPlayer] { ++winningPlayer }
+        } else {
+            var playerHands: [(Int, Card, Card)] = []
+            for playerNum in 0..<numPlayers {
+                if roundState.playerInHand[playerNum] {
+                    playerHands.append((playerNum, players.returnPlayerCard(playerNum, cardNum: 0), players.returnPlayerCard(playerNum, cardNum: 1)))
+                }
+                winningPlayer = compareHands(playerHands)
+            }
+        }
+        players.completeHand(winningPlayer, potSize: potSize)
+        tableLog += "\(players.returnPlayerName(winningPlayer)) wins $\(potSize)\n"
+        return tableLog
+    }
 
+    func compareHands(playerHands: [(Int, Card, Card)]) -> Int {
+        var tempPlayerHands = playerHands
+        var bestHand = tempPlayerHands.removeLast()
+        while tempPlayerHands.count > 0 {
+            var nextHand = tempPlayerHands.removeLast()
+            if betterHand(nextHand, hand2: bestHand) {
+                bestHand = nextHand
+            }
+        }
+        let (winningPlayer, _, _) = bestHand
+        return winningPlayer
+    }
+    
+    func betterHand(hand1: (Int, Card, Card), hand2: (Int, Card, Card)) -> Bool {
+        // needs work
+        return true
+    }
+    
     func deal(players: PlayerClass) {
         deck.shuffle()
         for cardNum in 0..<numCardsPerPlayer {
@@ -465,27 +447,38 @@ class HandState {
     }
     
     func userCall(players: PlayerClass) -> String {
-        let tableLog = roundState.userCall(players)
+        var tableLog = roundState.userCall(players)
         actionPlayer = (actionPlayer + 1) % numPlayers
+        if roundState.lastToAct == 0
+        {
+            tableLog += self.advanceRound(players)
+        }
         return tableLog
     }
 
     func userFold(players: PlayerClass) -> String {
-        let tableLog = roundState.userFold(players)
+        var tableLog = roundState.userFold(players)
         actionPlayer = (actionPlayer + 1) % numPlayers
+        if roundState.lastToAct == 0
+        {
+            tableLog += self.advanceRound(players)
+        }
         return tableLog
     }
 
     func userCheck(players: PlayerClass) -> String {
-        let tableLog = roundState.userFold(players)
+        var tableLog = roundState.userCheck(players)
         actionPlayer = (actionPlayer + 1) % numPlayers
+        if roundState.lastToAct == 0
+        {
+            tableLog += self.advanceRound(players)
+        }
         return tableLog
     }
 }
 
 class RoundState {
     var round = HandRound.Preflop
-    var board: [Card] = []
     var potSize: NSDecimalNumber = 0.00
     var betToCall: NSDecimalNumber = 0.00
     var straddle = false
@@ -501,15 +494,15 @@ class RoundState {
     init (numPlayers: Int, buttonPlayer: Int) {
         self.numPlayers = numPlayers
         self.buttonPlayer = buttonPlayer
+        self.lastToAct = (buttonPlayer + 2) % numPlayers
         for playerNum in 0..<numPlayers { playerInHand.append(true) }
         for playerNum in 0..<numPlayers { playerStacks.append(0.00) }
         for playerNum in 0..<numPlayers { playerActions.append(PlayerAction.None()) }
         for playerNum in 0..<numPlayers { playerMoneyInPot.append(0.00) }
     }
     
-    func reset(players: PlayerClass) {
+    func reset(players: PlayerClass, buttonPlayer: Int) {
         round = HandRound.Preflop
-        board.removeAll()
         potSize = 0.00
         betToCall = 0.00
         straddle = false
@@ -519,6 +512,7 @@ class RoundState {
         }
         for playerNum in 0..<numPlayers { playerActions[playerNum] = PlayerAction.None() }
         for playerNum in 0..<numPlayers { playerMoneyInPot[playerNum] = 0.00 }
+        self.buttonPlayer = buttonPlayer
         lastToAct = (buttonPlayer + 2) % numPlayers
         roundComplete = false
     }
@@ -536,7 +530,7 @@ class RoundState {
             potSize += betAmount
             betToCall = betAmount
             playerMoneyInPot[actionPlayer] = betAmount
-            lastToAct = (actionPlayer - 1) % numPlayers
+            lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
             tableLog += "\(players.returnPlayerName(actionPlayer)) bets $\(betAmount)\n"
             tableLog += "Pot size is now $\(potSize)\n"
         case .Call(let callAmount):
@@ -551,7 +545,7 @@ class RoundState {
             players.moneyInPot(actionPlayer, amount: raiseAmount)
             potSize += raiseAmount
             playerMoneyInPot[actionPlayer] += raiseAmount
-            lastToAct = (actionPlayer - 1) % numPlayers
+            lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
             tableLog += "\(players.returnPlayerName(actionPlayer)) raises $\(raiseAmount)\n"
             tableLog += "Pot size is now $\(potSize)\n"
         case .Check:
@@ -562,7 +556,7 @@ class RoundState {
         return tableLog
     }
     
-    func advanceRound(deck: Deck) {
+    func advanceRound(deck: Deck, buttonPlayer: Int) {
         // check if only one player is remaining; if so, break
         if round == .River { return }
         var numPlayersInHand = 0
@@ -572,17 +566,7 @@ class RoundState {
         if numPlayersInHand <= 1 { return }
         // if multiple players, advance round and reset roundState values
         round = HandRound(rawValue: (round.rawValue + 1))!
-        switch round {
-        case .Flop:
-            board.append(deck.dealCard())
-            board.append(deck.dealCard())
-            board.append(deck.dealCard())
-        case .Turn:
-            board.append(deck.dealCard())
-        case .River:
-            board.append(deck.dealCard())
-        default: break
-        }
+        self.buttonPlayer = buttonPlayer
         lastToAct = buttonPlayer
         betToCall = 0.00
         for playerNum in 0..<numPlayers { playerActions[playerNum] = PlayerAction.None() }
