@@ -273,39 +273,47 @@ class HandState {
     let numPlayers: Int
     let numCardsPerPlayer: Int
     var straddle = false
-    var playerStacks: [NSDecimalNumber] = []   
+    var playerStacks: [NSDecimalNumber] = []
+    var playerMoneyInPot: [NSDecimalNumber] = []
     var playerInHand: [Bool] = []
+    var playerActions: [PlayerAction] = []
     let buttonPlayer: Int
+    var lastToAct: Int
+    var actionPlayer: Int
     var numPlayersInHand: Int
     var currentRound = HandRound.Preflop
     var handComplete = false
-    var betRound: RoundState
-   
+    var betToCall: NSDecimalNumber = 0.00
+    
     init(numPlayers: Int, numCardsPerPlayer: Int, buttonPlayer: Int, players: PlayerClass) {
         self.numPlayers = numPlayers
         self.numPlayersInHand = numPlayers
         self.numCardsPerPlayer = numCardsPerPlayer
         self.buttonPlayer = buttonPlayer
+        self.lastToAct = (buttonPlayer + 2) % numPlayers
+        self.actionPlayer = (buttonPlayer + 3) % numPlayers
         for playerNum in 0..<numPlayers {
-            playerInHand.append(true)
             playerStacks.append(players.returnPlayerStack(playerNum))
-        self.betRound = RoundState(currentRound: currentRound, playerInHand: playerInHand, numPlayers: numPlayers, buttonPlayer: buttonPlayer)
+            playerMoneyInPot.append(0.00)
+            playerInHand.append(true)
+            playerActions.append(PlayerAction.None())
         }
     }
 
-    func isUserTurn() -> Bool { return betRound.isUserTurn() }
+    func isUserTurn() -> Bool { return actionPlayer == 0 }
     
     func inHand(playerNum: Int) -> Bool { return playerInHand[playerNum] }
     
-    func returnPotSize() -> NSDecimalNumber { return potSize + betRound.potSize }
+    func returnPotSize() -> NSDecimalNumber { return potSize }
     
     func returnHandStatus(players: PlayerClass) -> HandStatus {
+        // Used to determine buttons to display in ViewController
         if handComplete { return .HandComplete }
         if !playerInHand[0] { return .PlayerFolded }
-        if betRound.betToCall > players.returnPlayerStack(0) {
+        if betToCall > players.returnPlayerStack(0) {
             return .BetMoreThanStack
         }
-        if betRound.betToCall == 0 {
+        if betToCall == 0 {
             return .NoBet
         } else {
             return .BetPlaced
@@ -316,6 +324,56 @@ class HandState {
     
     func returnBoardCardImage(cardNum: Int) -> String { return board[cardNum-1].cardImage }
     
+    func continueHand(players: PlayerClass) -> String {
+        //needs work
+        // need an indication of 'end-of-round'
+        var tableLog = ""
+        if playerInHand[actionPlayer] && playerStacks[actionPlayer] > 0.00 {
+            let playerAction = players.takeAction(actionPlayer, handState: self)
+            switch playerAction {
+            case .Fold:
+                playerActions[actionPlayer] = playerAction
+                playerInHand[actionPlayer] = false
+                tableLog += "\(players.returnPlayerName(actionPlayer)) folds\n"
+            case .Bet(let betAmount):
+                playerActions[actionPlayer] = playerAction
+                players.moneyInPot(actionPlayer, amount: betAmount)
+                potSize += betAmount
+                betToCall = betAmount
+                playerMoneyInPot[actionPlayer] = betAmount
+                lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
+                tableLog += "\(players.returnPlayerName(actionPlayer)) bets $\(betAmount)\n"
+                tableLog += "Pot size is now $\(potSize)\n"
+            case .Call(let callAmount):
+                playerActions[actionPlayer] = playerAction
+                players.moneyInPot(actionPlayer, amount: callAmount)
+                potSize += callAmount
+                playerMoneyInPot[actionPlayer] += callAmount
+                tableLog += "\(players.returnPlayerName(actionPlayer)) calls $\(callAmount)\n"
+                tableLog += "Pot size is now $\(potSize)\n"
+            case .Raise(let raiseAmount):
+                playerActions[actionPlayer] = playerAction
+                players.moneyInPot(actionPlayer, amount: raiseAmount)
+                potSize += raiseAmount
+                playerMoneyInPot[actionPlayer] += raiseAmount
+                lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
+                tableLog += "\(players.returnPlayerName(actionPlayer)) raises $\(raiseAmount)\n"
+                tableLog += "Pot size is now $\(potSize)\n"
+            case .Check:
+                playerActions[actionPlayer] = playerAction
+                tableLog += "\(players.returnPlayerName(actionPlayer)) checks\n"
+            default: break
+            }
+        }
+        if actionPlayer == lastToAct
+        {
+            tableLog += self.advanceRound(players)
+        } else {
+            actionPlayer = (actionPlayer + 1) % numPlayers
+        }
+        return tableLog
+    }
+    
     func advanceRound(players: PlayerClass) -> String {
         var tableLog = ""
         if (currentRound == .River) || (numPlayersInHand == 1) {
@@ -324,7 +382,14 @@ class HandState {
             return tableLog
         }
         currentRound = HandRound(rawValue: (currentRound.rawValue + 1))!
-        self.betRound = RoundState(currentRound: currentRound, playerInHand: playerInHand, numPlayers: numPlayers, buttonPlayer: buttonPlayer)
+        lastToAct = buttonPlayer
+        actionPlayer = (buttonPlayer + 1) % numPlayers
+        betToCall = 0.00
+        for playerNum in 0..<numPlayers {
+            playerMoneyInPot[playerNum] = 0
+            if playerInHand[playerNum] { playerActions[playerNum] = PlayerAction.None() }
+            else { playerActions[playerNum] = PlayerAction.Fold() }
+        }
         switch currentRound {
         case .Flop:
             tableLog += "Flop is "
@@ -345,22 +410,8 @@ class HandState {
         default: break
         }
         return tableLog
-    }
-
-    func continueHand(players: PlayerClass) -> String {
-//needs work
-        // need an indication of 'end-of-round'
-        var tableLog: String = betRound.continueRound(players)
-        potSize = betRound.potSize
-        if actionPlayer == betRound.lastToAct
-        {
-            tableLog += self.advanceRound(players)
-        } else {
-            actionPlayer = (actionPlayer + 1) % numPlayers
         }
-        return tableLog
-    }
-    
+
     func completeHand(players: PlayerClass) -> String {
 //needs work
         var winningPlayer = 0
@@ -373,9 +424,9 @@ class HandState {
                 if playerInHand[playerNum] {
                     playerHands.append((playerNum, players.returnPlayerCard(playerNum, cardNum: 0), players.returnPlayerCard(playerNum, cardNum: 1)))
                 }
-                winningPlayer = compareHands(playerHands)
             }
-        }
+            winningPlayer = compareHands(playerHands)
+            }
         players.completeHand(winningPlayer, potSize: potSize)
         tableLog += "\(players.returnPlayerName(winningPlayer)) wins $\(potSize)\n"
         return tableLog
@@ -409,142 +460,91 @@ class HandState {
     }
     
     func collectBlinds(players: PlayerClass, smallBlindPlayer: Int, smallBlindSize: NSDecimalNumber, bigBlindPlayer: Int, bigBlindSize: NSDecimalNumber) -> String {
-        // needs work
-            var tableLog: String = ""
+             var tableLog: String = ""
             let smallBlind = players.moneyInPot(smallBlindPlayer, amount: smallBlindSize)
             potSize += smallBlind
-            betRound.playerMoneyInPot[smallBlindPlayer] = smallBlind
+            playerMoneyInPot[smallBlindPlayer] = smallBlind
             tableLog += "\(players.returnPlayerName(smallBlindPlayer)) chips in small blind of $\(smallBlind)\n"
             let bigBlind = players.moneyInPot(bigBlindPlayer, amount: bigBlindSize)
             potSize += bigBlind
-            betRound.playerMoneyInPot[bigBlindPlayer] = bigBlind
+            playerMoneyInPot[bigBlindPlayer] = bigBlind
             tableLog += "\(players.returnPlayerName(bigBlindPlayer)) chips in big blind of $\(bigBlind)\n"
             tableLog += "Pot size is now $\(potSize)\n"
             actionPlayer = (bigBlindPlayer + 1) % numPlayers
-            betRound.potSize = potSize
-            betRound.betToCall = bigBlindSize
+            betToCall = bigBlindSize
             return tableLog
     }
     
     func userBet(betAmount: NSDecimalNumber, players: PlayerClass) -> String {
-        return betRound.userBet(betAmount, players: players)
-    }
-
-    func userRaise(betAmount: NSDecimalNumber, players: PlayerClass) -> String {
-        return betRound.userRaise(betAmount, players: players)
+        var tableLog = ""
+        playerActions[0] = PlayerAction.Bet(betAmount)
+        players.moneyInPot(0, amount: betAmount)
+        potSize += betAmount
+        betToCall = betAmount
+        playerMoneyInPot[0] = betAmount
+        lastToAct = numPlayers - 1
+        tableLog += "\(players.returnPlayerName(0)) bets $\(betAmount)\n"
+        tableLog += "Pot size is now $\(potSize)\n"
+        actionPlayer = (actionPlayer + 1) % numPlayers
+        return tableLog
     }
     
     func userCall(players: PlayerClass) -> String {
-        var tableLog = betRound.userCall(players)
-        if betRound.lastToAct == 0
+        var tableLog = ""
+        playerActions[0] = PlayerAction.Call(betToCall)
+        let callAmount = players.moneyInPot(0, amount: betToCall)
+        potSize += callAmount
+        playerMoneyInPot[0] = callAmount
+        tableLog += "\(players.returnPlayerName(0)) calls $\(callAmount)\n"
+        tableLog += "Pot size is now $\(potSize)\n"
+        if actionPlayer == lastToAct
         {
             tableLog += self.advanceRound(players)
-        }
-        return tableLog
-    }
-
-    func userFold(players: PlayerClass) -> String {
-        var tableLog = betRound.userFold(players)
-        if betRound.lastToAct == 0
-        {
-            tableLog += self.advanceRound(players)
-        }
-        return tableLog
-    }
-
-    func userCheck(players: PlayerClass) -> String {
-        var tableLog = betRound.userCheck(players)
-        if betRound.lastToAct == 0
-        {
-            tableLog += self.advanceRound(players)
-        }
-        return tableLog
-    }
-}
-
-
-// RoundState class
-
-class RoundState {
-    var betToCall: NSDecimalNumber = 0.00
-    var playerActions: [PlayerAction] = []
-    var playerMoneyInPot: [NSDecimalNumber] = []
-    var lastToAct: Int = 0
-    var roundComplete: Bool = false
-    var numPlayers: Int = 0
-    var actionPlayer: Int = 0
-    var potSize: NSDecimalNumber {
-        get {
-            var tempPotSize : NSDecimalNumber = 0
-            for playerNum in 0..<numPlayers { tempPotSize += playerMoneyInPot[playerNum] }
-            return tempPotSize
-        }
-    }
-    
-    init (currentRound: HandRound, playerInHand: [Bool], numPlayers: Int, buttonPlayer: Int) {
-        self.numPlayers = numPlayers
-        self.actionPlayer = (buttonPlayer + 1) % numPlayers
-        if currentRound == .Preflop {
-            self.lastToAct = (buttonPlayer + 2) % numPlayers
         } else {
-            self.lastToAct = buttonPlayer
-        }
-        for playerNum in 0..<numPlayers {
-            playerMoneyInPot.append(0.00)
-            if playerInHand[playerNum] {
-                playerActions.append(PlayerAction.None())
-            } else {
-                playerActions.append(PlayerAction.Fold())
-            }
-        }
-    }
-    
-    func isUserTurn() -> Bool { return actionPlayer == 0 }
-
-    func updateRound(players: PlayerClass) -> String {
-        var tableLog = ""
-        switch
-    }
-    
-    /*
-    func updateRound(actionPlayer: Int, playerAction: PlayerAction, players: PlayerClass) -> String {
-        var tableLog = ""
-        switch playerAction {
-    case .Fold:
-            playerActions[actionPlayer] = playerAction
-        playerInHand[actionPlayer] = false
-        tableLog += "\(players.returnPlayerName(actionPlayer)) folds\n"
-     
-        }    case .Bet(let betAmount):
-        playerActions[actionPlayer] = playerAction
-    players.moneyInPot(actionPlayer, amount: betAmount)
-    potSize += betAmount
-    betToCall = betAmount
-    playerMoneyInPot[actionPlayer] = betAmount
-    lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
-    tableLog += "\(players.returnPlayerName(actionPlayer)) bets $\(betAmount)\n"
-    tableLog += "Pot size is now $\(potSize)\n"
-    case .Call(let callAmount):
-        playerActions[actionPlayer] = playerAction
-    players.moneyInPot(actionPlayer, amount: callAmount)
-    potSize += callAmount
-    playerMoneyInPot[actionPlayer] += callAmount
-    tableLog += "\(players.returnPlayerName(actionPlayer)) calls $\(callAmount)\n"
-    tableLog += "Pot size is now $\(potSize)\n"
-    case .Raise(let raiseAmount):
-        playerActions[actionPlayer] = playerAction
-    players.moneyInPot(actionPlayer, amount: raiseAmount)
-    potSize += raiseAmount
-    playerMoneyInPot[actionPlayer] += raiseAmount
-    lastToAct = (actionPlayer + numPlayers - 1) % numPlayers
-    tableLog += "\(players.returnPlayerName(actionPlayer)) raises $\(raiseAmount)\n"
-    tableLog += "Pot size is now $\(potSize)\n"
-    case .Check:
-        playerActions[actionPlayer] = playerAction
-    tableLog += "\(players.returnPlayerName(actionPlayer)) checks\n"
-    default: break
+            actionPlayer = (actionPlayer + 1) % numPlayers
         }
         return tableLog
     }
-*/
+    
+    func userRaise(raiseAmount: NSDecimalNumber, players: PlayerClass) -> String {
+        var tableLog = ""
+        playerActions[0] = PlayerAction.Raise(raiseAmount)
+        players.moneyInPot(0, amount: betToCall)
+        players.moneyInPot(0, amount: raiseAmount)
+        betToCall += raiseAmount
+        potSize += betToCall
+        playerMoneyInPot[0] += betToCall
+        lastToAct = numPlayers - 1
+        tableLog += "\(players.returnPlayerName(0)) raises to $\(raiseAmount)\n"
+        tableLog += "Pot size is now $\(potSize)\n"
+        actionPlayer = (actionPlayer + 1) % numPlayers
+        return tableLog
+    }
+    
+    func userCheck(players: PlayerClass) -> String {
+        var tableLog = ""
+        playerActions[0] = PlayerAction.Check()
+        tableLog += "\(players.returnPlayerName(0)) checks\n"
+       if actionPlayer == lastToAct
+        {
+            tableLog += self.advanceRound(players)
+        } else {
+            actionPlayer = (actionPlayer + 1) % numPlayers
+        }
+        return tableLog
+    }
+    
+    func userFold(players: PlayerClass) -> String {
+        var tableLog = ""
+        playerActions[0] = PlayerAction.Fold()
+        playerInHand[0] = false
+        tableLog += "\(players.returnPlayerName(0)) folds\n"
+        if actionPlayer == lastToAct
+        {
+            tableLog += self.advanceRound(players)
+        } else {
+            actionPlayer = (actionPlayer + 1) % numPlayers
+        }
+        return tableLog
+    }
 }

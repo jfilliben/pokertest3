@@ -279,11 +279,9 @@ class ViewController: UIViewController {
 
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while (!game.isUserTurn()) && (game.returnHandStatus() != .HandComplete) {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }
@@ -293,11 +291,9 @@ class ViewController: UIViewController {
         game.buttonPressed(ButtonPressed.Bet(10.00))
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while (!game.isUserTurn()) && (game.returnHandStatus() != .HandComplete) {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }
@@ -307,11 +303,9 @@ class ViewController: UIViewController {
         game.buttonPressed(ButtonPressed.Check)
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while (!game.isUserTurn()) && (game.returnHandStatus() != .HandComplete) {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }
@@ -321,11 +315,9 @@ class ViewController: UIViewController {
         game.buttonPressed(ButtonPressed.Raise(15.00))
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while (!game.isUserTurn()) && (game.returnHandStatus() != .HandComplete) {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }
@@ -335,11 +327,9 @@ class ViewController: UIViewController {
         game.buttonPressed(ButtonPressed.Fold)
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while game.returnHandStatus() != .HandComplete {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }
@@ -349,11 +339,9 @@ class ViewController: UIViewController {
         game.buttonPressed(ButtonPressed.Call)
         self.updateGameView()
         
-        var userTurn = game.isUserTurn()
-        while (!userTurn) && (game.returnHandStatus() != .HandComplete) {
+        while (!game.isUserTurn()) && (game.returnHandStatus() != .HandComplete) {
             //            sleep(2)
             game.continueGame()
-            userTurn = game.isUserTurn()
             self.updateGameView()
         }
     }

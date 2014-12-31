@@ -10,19 +10,19 @@
 
 import Foundation
 
-func alwaysFold(playerNum: Int, roundState: RoundState) -> PlayerAction {
-    if roundState.betToCall - roundState.playerMoneyInPot[playerNum] == 0 {
+func alwaysFold(playerNum: Int, handState: HandState) -> PlayerAction {
+    if handState.betToCall - handState.playerMoneyInPot[playerNum] == 0 {
         return PlayerAction.Check()
     } else {
     return PlayerAction.Fold()
     }
 }
 
-func alwaysCall(playerNum: Int, roundState: RoundState) -> PlayerAction {
-    if roundState.betToCall == 0.00 { return PlayerAction.Check() }
-    let proposedCall = roundState.betToCall-roundState.playerMoneyInPot[playerNum]
-    if proposedCall > roundState.playerStacks[playerNum] {
-        return PlayerAction.Call(roundState.playerStacks[playerNum])
+func alwaysCall(playerNum: Int, handState: HandState) -> PlayerAction {
+    if handState.betToCall == 0.00 { return PlayerAction.Check() }
+    let proposedCall = handState.betToCall - handState.playerMoneyInPot[playerNum]
+    if proposedCall > handState.playerStacks[playerNum] {
+        return PlayerAction.Call(handState.playerStacks[playerNum])
     }
     return PlayerAction.Call(proposedCall)
 }
@@ -52,14 +52,14 @@ class ComputerPlayer: Player {
     //    var logicAlgorithm : () -> PlayerAction()
     var tiltFactor = 0
     var attemptCheckRaise = false
-    let takeAction: (Int, RoundState) -> PlayerAction
+    let takeAction: (Int, HandState) -> PlayerAction
     
     override func handReset() {
         super.handReset()
         attemptCheckRaise = false
     }
     
-    init(name: String, stackSize: NSDecimalNumber, takeAction: (Int, RoundState) -> PlayerAction) {
+    init(name: String, stackSize: NSDecimalNumber, takeAction: (Int, HandState) -> PlayerAction) {
         self.takeAction = takeAction
         super.init(name: name, stackSize: stackSize)
     }
@@ -138,8 +138,8 @@ class PlayerClass {
         }
     }
     
-    func takeAction(playerNum: Int, roundState: RoundState) -> PlayerAction {
-        return players[playerNum-1].takeAction(playerNum, roundState)
+    func takeAction(playerNum: Int, handState: HandState) -> PlayerAction {
+        return players[playerNum-1].takeAction(playerNum, handState)
     }
     
     func moneyInPot (playerNum: Int, amount: NSDecimalNumber) -> NSDecimalNumber {
