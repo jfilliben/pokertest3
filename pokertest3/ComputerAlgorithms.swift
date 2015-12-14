@@ -74,11 +74,11 @@ class PlayerClass {
     var players = [ComputerPlayer]()
     
     init() {
-        players.append(ComputerPlayer(name: "Alice", stackSize: 100.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Bob",   stackSize: 90.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Carl",  stackSize: 80.00, alwaysFold))
-        players.append(ComputerPlayer(name: "Dawn",  stackSize: 70.00, alwaysCall))
-        players.append(ComputerPlayer(name: "Edwin", stackSize: 60.00, alwaysCall))
+        players.append(ComputerPlayer(name: "Alice", stackSize: 100.00, takeAction: alwaysFold))
+        players.append(ComputerPlayer(name: "Bob",   stackSize: 90.00, takeAction: alwaysFold))
+        players.append(ComputerPlayer(name: "Carl",  stackSize: 80.00, takeAction: alwaysFold))
+        players.append(ComputerPlayer(name: "Dawn",  stackSize: 70.00, takeAction: alwaysCall))
+        players.append(ComputerPlayer(name: "Edwin", stackSize: 60.00, takeAction: alwaysCall))
         user.image = "player2"
     }
     

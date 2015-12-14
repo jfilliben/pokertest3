@@ -89,7 +89,7 @@ prefix func ++(inout lhs: NSDecimalNumber) -> NSDecimalNumber
 
 postfix func ++(inout lhs: NSDecimalNumber) -> NSDecimalNumber
 {
-    let copy : NSDecimalNumber = lhs.copy() as NSDecimalNumber
+    let copy : NSDecimalNumber = lhs.copy() as! NSDecimalNumber
     lhs = lhs.decimalNumberByAdding(NSDecimalNumber.one())
     return copy
 }
@@ -101,7 +101,7 @@ prefix func --(inout lhs: NSDecimalNumber) -> NSDecimalNumber
 
 postfix func --(inout lhs: NSDecimalNumber) -> NSDecimalNumber
 {
-    let copy : NSDecimalNumber = lhs.copy() as NSDecimalNumber
+    let copy : NSDecimalNumber = lhs.copy() as! NSDecimalNumber
     lhs = lhs.decimalNumberBySubtracting(NSDecimalNumber.one())
     return copy
 }

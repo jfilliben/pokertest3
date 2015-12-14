@@ -90,7 +90,7 @@ class Deck {
 
     func shuffle() {
         var tempDeck = deck
-        for i in reverse(1 ... (deck.count - 1)) {
+        for i in Array((1 ... (deck.count - 1)).reverse()) {
             let rndNum = Int(arc4random_uniform(UInt32(i)))
             swap(&tempDeck[i], &tempDeck[rndNum])
         }
@@ -436,7 +436,7 @@ class HandState {
         var tempPlayerHands = playerHands
         var bestHand = tempPlayerHands.removeLast()
         while tempPlayerHands.count > 0 {
-            var nextHand = tempPlayerHands.removeLast()
+            let nextHand = tempPlayerHands.removeLast()
             if betterHand(nextHand, hand2: bestHand) {
                 bestHand = nextHand
             }

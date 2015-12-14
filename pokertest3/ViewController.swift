@@ -151,7 +151,7 @@ class ViewController: UIViewController {
         
         tableLogTextView.editable = false
         tableLogTextView.text = game.returnTableLog()
-        tableLogTextView.scrollRangeToVisible(NSRange(location: countElements(tableLogTextView.text!), length: 0))
+        tableLogTextView.scrollRangeToVisible(NSRange(location: tableLogTextView.text!.characters.count, length: 0))
     }
     
     func updateGameView() {
@@ -222,7 +222,7 @@ class ViewController: UIViewController {
         potView.text = "$\(game.returnPotSize())"
 
         tableLogTextView.text = game.returnTableLog()
-        tableLogTextView.scrollRangeToVisible(NSRange(location: countElements(tableLogTextView.text!), length: 0))
+        tableLogTextView.scrollRangeToVisible(NSRange(location: tableLogTextView.text!.characters.count, length: 0))
         
         // check status of game to determine buttons to display
         switch game.returnHandStatus() {
